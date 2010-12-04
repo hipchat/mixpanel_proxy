@@ -11,8 +11,7 @@ class Options(usage.Options):
         ["verbose", "v", "Verbose logging"]]
 
     optParameters = [
-        ["interface", None, "localhost:8067",
-            "Interface to accept requests on."]]
+        ["interface", None, "localhost:8067", "Interface to listen on."]]
 
     longdesc = 'This is a service for sending Mixpanel stats asynchronously. \
         Please see http://github.com/powdahound/mixpanel_proxy for details.'
