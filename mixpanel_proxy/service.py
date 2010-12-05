@@ -3,24 +3,24 @@ from base64 import b64encode
 from twisted.application.service import Service
 from twisted.internet import defer, protocol, reactor
 from twisted.internet.protocol import Factory
-from twisted.protocols.basic import LineReceiver
+from twisted.protocols.basic import LineOnlyReceiver
 from twisted.protocols.policies import TimeoutMixin
 from twisted.python import log
 from twisted.web.client import getPage
 
 
-class MixpanelProtocol(LineReceiver, TimeoutMixin):
+class MixpanelProtocol(LineOnlyReceiver, TimeoutMixin):
 
     IDLE_TIMEOUT = 60 * 10
 
     def connectionMade(self):
-        LineReceiver.connectionMade(self)
+        LineOnlyReceiver.connectionMade(self)
         self.setTimeout(self.IDLE_TIMEOUT)
         if self.factory.service.verbose:
             log.msg("VERBOSE: Connection made: %r" % self.transport)
 
     def connectionLost(self, reason):
-        LineReceiver.connectionLost(self, reason)
+        LineOnlyReceiver.connectionLost(self, reason)
         if self.factory.service.verbose:
             log.msg("VERBOSE: Connection lost: %r, reason=%s"
                     % (self.transport, reason))
