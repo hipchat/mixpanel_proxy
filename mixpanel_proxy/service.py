@@ -9,7 +9,7 @@ from twisted.python import log
 from twisted.web.client import getPage
 
 
-class MixpanelProtocol(LineOnlyReceiver, TimeoutMixin):
+class MixpanelProxyProtocol(LineOnlyReceiver, TimeoutMixin):
 
     IDLE_TIMEOUT = 60 * 10
 
@@ -72,9 +72,9 @@ class MixpanelProtocol(LineOnlyReceiver, TimeoutMixin):
         self.transport.loseConnection()
 
 
-class MixpanelProtocolFactory(Factory):
+class MixpanelProxyProtocolFactory(Factory):
 
-    protocol = MixpanelProtocol
+    protocol = MixpanelProxyProtocol
 
     def __init__(self, service):
         self.service = service
@@ -106,7 +106,7 @@ class MixpanelProxyService(Service):
 
     def startService(self):
         Service.startService(self)
-        f = MixpanelProtocolFactory(self)
+        f = MixpanelProxyProtocolFactory(self)
         interface, port = self.interface.split(':')
         reactor.listenTCP(port=int(port), interface=interface, factory=f)
         log.msg('Listening on %s...' % self.interface)
