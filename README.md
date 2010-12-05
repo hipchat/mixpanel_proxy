@@ -29,20 +29,13 @@ Use
 
 Connect to mixpanel_proxy on localhost:8067 and send the full JSON blob followed by a newline. The interface and port can be changed using the `--interface` option.
 
-Command line:
-
     $ telnet localhost 8067
     Trying localhost...
     Connected to localhost.
     Escape character is '^]'.
-    {"event":"test","properties":{"ip":"10","token":"abc123"}}
+    {"event":"test","properties":{"distinct_id":"123456","token":"abc123"}}
     OK
 
-PHP:
-
-Python:
-
-Ruby:
-
+Code examples provided in the examples/ directory.
 
 Connections are closed automatically after 10 minutes of inactivity so make sure you can handle reconnection if necessary.
