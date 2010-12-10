@@ -19,7 +19,7 @@ def refresh_plugin_cache():
 
 
 if __name__ == "__main__":
-    setup(name='mixpanel_proy',
+    setup(name='mixpanel_proxy',
         version='1.0',
         description='Asynchronous sending of Mixpanel stats.',
         author='Garret Heaton',
