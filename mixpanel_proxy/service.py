@@ -93,11 +93,12 @@ class MixpanelProxyService(Service):
             r = yield getPage(url)
             if self.verbose:
                 log.msg("VERBOSE: Mixpanel response: %r" % r)
-            if r == "0":
+            if r == "1":
+                log.msg("Stat sent: %r" % data)
+            else:
                 log.msg("Stat rejected: %r" % data)
         except Exception, e:
             log.msg("ERROR: Error connecting to Mixpanel: %s" % e)
-        log.msg("Stat sent: %r" % data)
 
     def startService(self):
         Service.startService(self)
