@@ -20,10 +20,11 @@ class MixpanelProxyProtocol(LineOnlyReceiver, TimeoutMixin):
             log.msg("VERBOSE: Connection made: %r" % self.transport)
 
     def connectionLost(self, reason):
-        LineOnlyReceiver.connectionLost(self, reason)
         if self.factory.service.verbose:
             log.msg("VERBOSE: Connection lost: %r, reason=%s"
                     % (self.transport, reason))
+        LineOnlyReceiver.connectionLost(self, reason)
+        self.setTimeout(None)
 
     def lineReceived(self, line):
         self.resetTimeout()
