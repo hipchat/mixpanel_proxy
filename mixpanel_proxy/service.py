@@ -54,11 +54,6 @@ class MixpanelProxyProtocol(LineOnlyReceiver, TimeoutMixin):
             self.sendError('Missing "token" property.')
             return
 
-        if 'distinct_id' not in data['properties'] and \
-            'ip' not in data['properties']:
-            self.sendError('You need a "distinct_id" or "ip" property.')
-            return
-
         self.factory.service.sendStat(data)
         self.sendLine('OK')
 
