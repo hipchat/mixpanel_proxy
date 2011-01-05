@@ -7,7 +7,7 @@ from twisted.python import log
 class MixpanelProxyClientProtocol(LineOnlyReceiver):
 
     def connectionMade(self):
-        print "connection made: %r" % self.transport
+        log.msg("Connection made to mixpanel_proxy: %r" % self.transport)
 
     def send(self, data):
         self.sendLine(json.dumps(data))
@@ -108,7 +108,7 @@ def test():
     }
 
     res = yield mp.sendStat(data)
-    print res
+    print "Result: %r" % res
 
     reactor.callLater(1, reactor.stop)
 
