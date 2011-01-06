@@ -6,6 +6,13 @@ from twisted.python import log
 
 class MixpanelProxyClientProtocol(LineOnlyReceiver):
 
+    def __init__(self):
+        self._disconnected = False
+
+    def connectionLost(self):
+        log.msg('Connection lost to mixpanel_proxy: %r' % self.transport)
+        self._disconnected = True
+
     def connectionMade(self):
         log.msg("Connection made to mixpanel_proxy: %r" % self.transport)
 
