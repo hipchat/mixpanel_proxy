@@ -9,8 +9,8 @@ class MixpanelProxyClientProtocol(LineOnlyReceiver):
     def __init__(self):
         self._disconnected = False
 
-    def connectionLost(self):
-        log.msg('Connection lost to mixpanel_proxy: %r' % self.transport)
+    def connectionLost(self, reason):
+        log.msg('Connection lost to mixpanel_proxy: %r' % reason)
         self._disconnected = True
 
     def connectionMade(self):
