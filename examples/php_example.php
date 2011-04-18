@@ -10,13 +10,7 @@ $data = array(
   )
 );
 
-$sock = fsockopen("localhost", 8067, $errno, $errstr, 5);
-if (!$sock) {
-  echo "Error connecting: $errno - $errstr";
-  exit;
-}
-
-fwrite($sock, json_encode($data)."\r\n");
+$sock = fsockopen("udp://127.0.0.1", 8067, $errno, $errstr);
+fwrite($sock, json_encode($data));
 fclose($sock);
 echo "sent: ".json_encode($data);
-

@@ -11,9 +11,9 @@ data = {
         'distinct_id': 123456,
         'token': MIXPANEL_TOKEN,
     }}
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.connect(("localhost", 8067))
-sock.send("%s\r\n" % json.dumps(data))
-sock.close()
-print "Sent: %r" % data
+message = "%s\r\n" % json.dumps(data)
 
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.sendto(message, ("127.0.0.1", 8067))
+
+print "Sent: %r" % data

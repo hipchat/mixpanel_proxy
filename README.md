@@ -1,7 +1,7 @@
 mixpanel_proxy
 ==============
 
-A service which accepts Mixpanel stats via TCP and delivers them to Mixpanel Mixpanel asynchronously. No job queue necessary.
+A service which accepts Mixpanel stats via UDP and delivers them to Mixpanel asynchronously. No job queue necessary.
 
 
 Install
@@ -27,15 +27,5 @@ Daemon:
 Use
 ---
 
-Connect to mixpanel_proxy on localhost:8067 and send the full JSON blob followed by a newline. The interface and port can be changed using the `--interface` option.
+Send a UDP datagram to the service (defaults to port 8067) containing the full JSON blob expected by the Mixpanel API. Code examples provided in the examples/ directory.
 
-    $ telnet localhost 8067
-    Trying localhost...
-    Connected to localhost.
-    Escape character is '^]'.
-    {"event":"test","properties":{"distinct_id":"123456","token":"abc123"}}
-    OK
-
-Code examples provided in the examples/ directory.
-
-Connections are closed automatically after 10 minutes of inactivity so make sure you can handle reconnection if necessary.

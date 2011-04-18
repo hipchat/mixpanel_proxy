@@ -12,8 +12,7 @@ data = {
   }
 }
 
-sock = TCPSocket.open('localhost', 8067)
-sock.puts(JSON.generate(data)+"\r\n")
-sock.close()
+sock = UDPSocket.new
+sock.send(JSON.generate(data)+"\r\n", 0, 'localhost', 8067)
 
 puts "Sent: " + JSON.generate(data)

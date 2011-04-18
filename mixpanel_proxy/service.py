@@ -2,87 +2,51 @@ import json
 from base64 import b64encode
 from twisted.application.service import Service
 from twisted.internet import defer, protocol, reactor
-from twisted.internet.protocol import Factory
-from twisted.protocols.basic import LineOnlyReceiver
-from twisted.protocols.policies import TimeoutMixin
+from twisted.internet.protocol import DatagramProtocol
 from twisted.python import log
-from twisted.web.client import getPage
+from twisted.web.client import getPage, HTTPClientFactory
 
 
-class MixpanelProxyProtocol(LineOnlyReceiver, TimeoutMixin):
-
-    IDLE_TIMEOUT = 60 * 10
-
-    def connectionMade(self):
-        LineOnlyReceiver.connectionMade(self)
-        self.setTimeout(self.IDLE_TIMEOUT)
-        if self.factory.service.verbose:
-            log.msg("VERBOSE: Connection made: %r" % self.transport)
-
-    def connectionLost(self, reason):
-        if self.factory.service.verbose:
-            log.msg("VERBOSE: Connection lost: %r, reason=%s"
-                    % (self.transport, reason))
-        LineOnlyReceiver.connectionLost(self, reason)
-        self.setTimeout(None)
-
-    def lineReceived(self, line):
-        self.resetTimeout()
-        if self.factory.service.verbose:
-            log.msg("VERBOSE: Received line %r" % line)
-
-        # quit if requested - just to make telnet testing easier
-        if line == 'quit':
-            self.transport.loseConnection()
-            return
-
-        # verify message as JSON
-        try:
-            data = json.loads(line)
-        except Exception, e:
-            self.sendError('Invalid JSON: %r' % line)
-            return
-
-        if 'event' not in data:
-            self.sendError('Missing "event" data.')
-            return
-
-        if 'properties' not in data:
-            self.sendError('Missing "properties" data.')
-            return
-
-        if 'token' not in data['properties']:
-            self.sendError('Missing "token" property.')
-            return
-
-        self.factory.service.sendStat(data)
-        self.sendLine('OK')
-
-    def sendError(self, message):
-        message = "ERROR: %s" % message
-        self.sendLine(message)
-        log.msg(message)
-
-    def timeoutConnection(self):
-        log.msg("Connection timed out: %r" % self.transport)
-        self.transport.loseConnection()
-
-
-class MixpanelProxyProtocolFactory(Factory):
-
-    protocol = MixpanelProxyProtocol
+class MixpanelProxyProtocol(DatagramProtocol):
 
     def __init__(self, service):
         self.service = service
 
+    def datagramReceived(self, data, (host, port)):
+        if self.service.verbose:
+            log.msg("VERBOSE: Received data %r" % data)
+
+        # verify message as JSON
+        try:
+            data = json.loads(data)
+        except Exception, e:
+            log.msg('ERROR: Invalid JSON. data=%r' % data)
+            return
+
+        if 'event' not in data:
+            log.msg('ERROR: Missing "event". data=%r' % data)
+            return
+
+        if 'properties' not in data:
+            log.msg('ERROR: Missing "properties". data=%r' % data)
+            return
+
+        if 'token' not in data['properties']:
+            log.msg('ERROR: Missing "token". data=%r' % data)
+            return
+
+        self.service.sendStat(data)
+
 
 class MixpanelProxyService(Service):
 
-    def __init__(self, interface, verbose):
-        self.interface = interface
+    def __init__(self, port, verbose):
+        self.port = int(port)
         self.verbose = bool(verbose)
 
-        protocol.Factory.noisy = False
+        if not self.verbose:
+            # we don't want to hear about each HTTP request we make
+            HTTPClientFactory.noisy = False
 
     @defer.inlineCallbacks
     def sendStat(self, data):
@@ -103,10 +67,8 @@ class MixpanelProxyService(Service):
 
     def startService(self):
         Service.startService(self)
-        f = MixpanelProxyProtocolFactory(self)
-        interface, port = self.interface.split(':')
-        reactor.listenTCP(port=int(port), interface=interface, factory=f)
-        log.msg('Listening on %s...' % self.interface)
+        reactor.listenUDP(self.port, MixpanelProxyProtocol(self))
+        log.msg('Listening (UDP) on port %s...' % self.port)
 
     def stopService(self):
         Service.stopService(self)
